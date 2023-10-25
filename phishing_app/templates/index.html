@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap");
+
+    * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    }
+
+    .section__container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 5rem 1rem;
+    }
+
+    .section__header {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: center;
+    }
+
+    .btn {
+    padding: 1rem 1.5rem;
+    outline: none;
+    border: none;
+    font-size: 1rem;
+    white-space: nowrap;
+    color: #ffffff;
+    background-color: #f95a47;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 2px 10px 20px #f9594751;
+    }
+
+    img {
+    width: 100%;
+    display: flex;
+    }
+
+    body {
+    font-family: "Lato", sans-serif;
+    }
+
+    header {
+    position: relative;
+    }
+
+    header::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 120%;
+    width: calc(50% - 15rem);
+    background-color: #2a1263;
+    z-index: -1;
+    }
+
+    .header__container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    align-items: center;
+    }
+
+    .header__content h1 {
+    margin-bottom: 2rem;
+    font-size: 3.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    }
+
+    .header__content p {
+    margin-bottom: 2rem;
+    color: #64748b;
+    }
+
+    .header__content form {
+    width: 100%;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    box-shadow: 1px 1px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .header__content input {
+    width: 100%;
+    padding: 0 1rem;
+    outline: none;
+    border: none;
+    font-size: 1rem;
+    }
+
+    .header__image {
+    position: relative;
+    padding-right: 2rem;
+    }
+    .safe {
+    color: green;
+    }
+
+    .suspicious {
+        color: red;
+    }
+
+  </style>
+  <title>Phishing Link (URL) Checker</title>
+</head>
+<body>
+  <header>
+      <div class="section__container header__container">
+        <div class="header__content">
+          <h1>Phishing Link (URL) Checker</h1>
+          <p>
+            Detect phishing or fraudulent links via an AI-powered real-time phishing link checker.
+          </p>
+          <form id="urlForm">
+            {% csrf_token %} <!-- Include the CSRF token here -->
+            <input type="text" id="urlInput" placeholder="Paste a URL here" />
+            <button type="button" id="checkButton">Check</button>
+          </form>
+          <h2 id="resultMessage" style="margin-top: 25px;" class="{{result_class}}"></h2>
+
+        </div>
+        <div class="header__image">
+          <img src="{% static 'assets/header.jpg' %}" alt="header" />
+        </div>
+      </div>
+  </header>
+  {% block script %}
+  <script>
+    const urlForm = document.getElementById("urlForm");
+    const urlInput = document.getElementById("urlInput");
+    const checkButton = document.getElementById("checkButton");
+    const resultMessage = document.getElementById("resultMessage");
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+    checkButton.addEventListener("click", () => {
+        const url = urlInput.value;
+        fetch('/classify/', {
+            method: 'POST',
+            body: JSON.stringify({ url: url }),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,  // Use csrfToken here
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            const result = data.result;
+            resultMessage.textContent = result;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            resultMessage.textContent = "An error occurred.";
+        });
+    });
+</script>
+
+  {% endblock %}
+</body>
+</html>
